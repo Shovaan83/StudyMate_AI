@@ -1,22 +1,19 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "npm install --prefix frontend && cd frontend && npm run build",
   "outputDirectory": "frontend/build",
   "installCommand": "npm install",
-  "builds": [
+  "functions": {
+    "api/index.js": {}
+  },
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/frontend/build/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
