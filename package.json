@@ -7,7 +7,7 @@
     "server": "cd backend && npm start",
     "client": "cd frontend && npm start",
     "build": "cd frontend && react-scripts build",
-    "vercel-build": "npm install --prefix frontend && cd frontend && react-scripts build",
+    "vercel-build": "npm install --prefix frontend && cd frontend && npm run build",
     "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
   "devDependencies": {

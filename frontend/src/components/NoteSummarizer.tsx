@@ -39,51 +39,7 @@ const NoteSummarizer: React.FC = () => {
     setDragOver(false);
   }, []);
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    if (!file) return;
-
-    // Check if file type is supported
-    const supportedExtensions = ['.txt', '.md', '.pdf', '.doc', '.docx', '.ppt', '.pptx'];
-    const fileName = file.name.toLowerCase();
-    const isSupported = supportedExtensions.some(ext => fileName.endsWith(ext));
-    
-    if (!isSupported) {
-      setError('Unsupported file format. Please use: .txt, .md, .pdf, .doc, .docx, .ppt, .pptx');
-      return;
-    }
-
-    // For text files, read directly on frontend
-    if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        setInputText(text);
-      };
-      reader.onerror = () => {
-        setError('Failed to read file');
-      };
-      reader.readAsText(file);
-    } else {
-      // For binary files (PDF, DOCX, PPTX), send to backend for processing
-      await handleFileSummarization(file);
-    }
-  }, []);
-
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    const file = files[0];
-    
-    if (file) {
-      await handleFileUpload(file);
-    } else {
-      setError('Please upload a supported file format');
-    }
-  }, [handleFileUpload]);
-
-  const handleFileSummarization = async (file: File) => {
+  const handleFileSummarization = useCallback(async (file: File) => {
     setIsLoading(true);
     setError('');
     
@@ -121,7 +77,51 @@ const NoteSummarizer: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [subject, difficulty, setSummaries, setInputText, setError, setIsLoading]);
+
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!file) return;
+
+    // Check if file type is supported
+    const supportedExtensions = ['.txt', '.md', '.pdf', '.doc', '.docx', '.ppt', '.pptx'];
+    const fileName = file.name.toLowerCase();
+    const isSupported = supportedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!isSupported) {
+      setError('Unsupported file format. Please use: .txt, .md, .pdf, .doc, .docx, .ppt, .pptx');
+      return;
+    }
+
+    // For text files, read directly on frontend
+    if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        setInputText(text);
+      };
+      reader.onerror = () => {
+        setError('Failed to read file');
+      };
+      reader.readAsText(file);
+    } else {
+      // For binary files (PDF, DOCX, PPTX), send to backend for processing
+      await handleFileSummarization(file);
+    }
+  }, [handleFileSummarization, setError, setInputText]);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const file = files[0];
+    
+    if (file) {
+      await handleFileUpload(file);
+    } else {
+      setError('Please upload a supported file format');
+    }
+  }, [handleFileUpload, setError, setDragOver]);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
