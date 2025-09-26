@@ -39,21 +39,7 @@ const NoteSummarizer: React.FC = () => {
     setDragOver(false);
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    const file = files[0];
-    
-    if (file) {
-      await handleFileUpload(file);
-    } else {
-      setError('Please upload a supported file format');
-    }
-  }, []);
-
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = useCallback(async (file: File) => {
     if (!file) return;
 
     // Check if file type is supported
@@ -81,7 +67,21 @@ const NoteSummarizer: React.FC = () => {
       // For binary files (PDF, DOCX, PPTX), send to backend for processing
       await handleFileSummarization(file);
     }
-  };
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const file = files[0];
+    
+    if (file) {
+      await handleFileUpload(file);
+    } else {
+      setError('Please upload a supported file format');
+    }
+  }, [handleFileUpload]);
 
   const handleFileSummarization = async (file: File) => {
     setIsLoading(true);
