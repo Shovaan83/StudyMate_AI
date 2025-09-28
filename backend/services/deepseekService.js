@@ -3,12 +3,19 @@ const axios = require('axios');
 class DeepSeekService {
   constructor() {
     if (!process.env.DEEPSEEK_API_KEY) {
+      console.error('❌ DEEPSEEK_API_KEY environment variable is missing');
       throw new Error('DEEPSEEK_API_KEY environment variable is required');
     }
     
     this.apiKey = process.env.DEEPSEEK_API_KEY;
     this.apiUrl = process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1';
     this.model = 'deepseek/deepseek-chat'; 
+    
+    console.log('🔑 DeepSeek service initialized:', {
+      apiUrl: this.apiUrl,
+      model: this.model,
+      apiKeyLength: this.apiKey.length
+    });
     
     this.requestCount = 0;
     this.dailyRequestCount = 0;
@@ -72,7 +79,7 @@ class DeepSeekService {
         return response.data.choices[0].message.content;
 
       } catch (error) {
-        console.error(`eepSeek API error (attempt ${attempt + 1}):`, error.message);
+        console.error(`DeepSeek API error (attempt ${attempt + 1}):`, error.message);
 
         if (error.response) {
           console.error('Status:', error.response.status);

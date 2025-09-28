@@ -42,11 +42,17 @@ router.post('/summarize', validateSummarizeRequest, async (req, res) => {
   try {
     const { text, subject, difficulty } = req.body;
     
-    console.log(`Summarizing ${text.length} characters of content...`);
+    console.log(`🚀 Summarization request received:`, {
+      textLength: text.length,
+      subject: subject || 'General',
+      difficulty: difficulty || 'intermediate',
+      apiKey: process.env.DEEPSEEK_API_KEY ? 'Set' : 'Missing',
+      apiUrl: process.env.OPENROUTER_API_URL || 'Using default'
+    });
     
     const result = await deepseekService.summarizeText(text);
     
-    console.log('Summary generated successfully');
+    console.log('✅ Summary generated successfully');
     
     res.json({
       success: true,
@@ -61,9 +67,17 @@ router.post('/summarize', validateSummarizeRequest, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Summarization error:', error);
+    console.error('❌ Summarization error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      response: error.response?.data
+    });
+    
     res.status(error.message.includes('Rate limit') ? 429 : 500).json({
       error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       usage: deepseekService.getStatus()
     });
   }
