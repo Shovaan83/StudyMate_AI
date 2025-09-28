@@ -6,6 +6,7 @@ require('dotenv').config();
 
 // Import routes
 const aiRoutes = require('../backend/routes/ai');
+const progressRoutes = require('../backend/routes/progress');
 
 const app = express();
 
@@ -50,6 +51,9 @@ app.get('/api/health', (req, res) => {
 
 // AI routes
 app.use('/api/ai', aiRoutes);
+
+// Progress routes
+app.use('/api/progress', progressRoutes);
 
 // Error handling middleware
 app.use((error, req, res, next) => {

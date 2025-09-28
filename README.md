@@ -53,7 +53,18 @@ DEEPSEEK_API_KEY=your_openrouter_api_key
 OPENROUTER_API_URL=https://openrouter.ai/api/v1
 REQUESTS_PER_MINUTE=20
 REQUESTS_PER_DAY=1000
+MAX_TOKENS_PER_REQUEST=32000
+PORT=3001
+FRONTEND_URL=http://localhost:3000
 ```
+
+### Vercel Environment Variables
+When deploying to Vercel, add these environment variables in your Vercel dashboard:
+- `DEEPSEEK_API_KEY` - Your OpenRouter API key
+- `OPENROUTER_API_URL` - https://openrouter.ai/api/v1  
+- `REQUESTS_PER_MINUTE` - 20
+- `REQUESTS_PER_DAY` - 1000
+- `MAX_TOKENS_PER_REQUEST` - 32000
 
 ### Vercel Deployment
 1. Import repository to [Vercel](https://vercel.com)
