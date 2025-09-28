@@ -4,7 +4,14 @@ const router = express.Router();
 const DeepSeekService = require('../services/deepseekService');
 const fileParser = require('../services/fileParser');
 
-const deepseekService = new DeepSeekService();
+// Lazy initialization of DeepSeek service
+let deepseekService = null;
+const getDeepSeekService = () => {
+  if (!deepseekService) {
+    deepseekService = new DeepSeekService();
+  }
+  return deepseekService;
+};
 
 const upload = multer({
   limits: {
@@ -50,7 +57,7 @@ router.post('/summarize', validateSummarizeRequest, async (req, res) => {
       apiUrl: process.env.OPENROUTER_API_URL || 'Using default'
     });
     
-    const result = await deepseekService.summarizeText(text);
+    const result = await getDeepSeekService().summarizeText(text);
     
     console.log('✅ Summary generated successfully');
     
@@ -63,7 +70,7 @@ router.post('/summarize', validateSummarizeRequest, async (req, res) => {
         timestamp: new Date().toISOString(),
         originalLength: text.length
       },
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
     
   } catch (error) {
@@ -78,7 +85,7 @@ router.post('/summarize', validateSummarizeRequest, async (req, res) => {
     res.status(error.message.includes('Rate limit') ? 429 : 500).json({
       error: error.message,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
   }
 });
@@ -104,7 +111,7 @@ router.post('/summarize/file', upload.single('file'), async (req, res) => {
     
     console.log(`Extracted ${text.length} characters from ${req.file.originalname}`);
     
-    const result = await deepseekService.summarizeText(text);
+    const result = await getDeepSeekService().summarizeText(text);
     
     console.log('File summary generated successfully');
     
@@ -119,14 +126,14 @@ router.post('/summarize/file', upload.single('file'), async (req, res) => {
         fileSize: req.file.size,
         extractedLength: text.length
       },
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
     
   } catch (error) {
     console.error('File summarization error:', error);
     res.status(error.message.includes('Rate limit') ? 429 : 500).json({
       error: error.message,
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
   }
 });
@@ -137,21 +144,21 @@ router.post('/quiz', validateSummarizeRequest, async (req, res) => {
     
     console.log(`Generating quiz with ${questionCount || 5} questions...`);
     
-    const result = await deepseekService.generateQuiz(text, difficulty || 'medium', parseInt(questionCount) || 5);
+    const result = await getDeepSeekService().generateQuiz(text, difficulty || 'medium', parseInt(questionCount) || 5);
     
     console.log('Quiz generated successfully');
     
     res.json({
       success: true,
       data: result,
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
     
   } catch (error) {
     console.error('Quiz generation error:', error);
     res.status(error.message.includes('Rate limit') ? 429 : 500).json({
       error: error.message,
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
   }
 });
@@ -163,28 +170,28 @@ router.post('/motivation', async (req, res) => {
     console.log('Generating motivational message...');
     
     const context = `User: ${userName || 'Student'}, Study streak: ${studyStreak || 0} days, Recent activity: ${recentActivity || 'studying'}`;
-    const result = await deepseekService.generateMotivationalMessage(context);
+    const result = await getDeepSeekService().generateMotivationalMessage(context);
     
     console.log('Motivational message generated');
     
     res.json({
       success: true,
       data: result,
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
     
   } catch (error) {
     console.error('Motivation generation error:', error);
     res.status(error.message.includes('Rate limit') ? 429 : 500).json({
       error: error.message,
-      usage: deepseekService.getStatus()
+      usage: getDeepSeekService().getStatus()
     });
   }
 });
 
 router.get('/usage', (req, res) => {
   try {
-    const usage = deepseekService.getStatus();
+    const usage = getDeepSeekService().getStatus();
     
     res.json({
       success: true,
@@ -201,7 +208,7 @@ router.get('/usage', (req, res) => {
 
 router.get('/health', (req, res) => {
   try {
-    const status = deepseekService.getStatus();
+    const status = getDeepSeekService().getStatus();
     const isHealthy = status.requestsToday < status.dailyLimit;
     
     res.json({
